@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythos Engine - Setup</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400&display=swap');
+        
+        :root { 
+            --royal-purple: #c084fc; 
+            --deep-purple: #581c87; 
+            --night-bg: #030005; 
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--night-bg); 
+            color: #e9d5ff; 
+            background-image: radial-gradient(circle at 50% 50%, #17042e 0%, #02010a 100%);
+        }
+
+        .font-pacifico { font-family: 'Pacifico', cursive; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        
+        .royal-card { 
+            background: rgba(15, 5, 20, 0.6); 
+            border: 1px solid rgba(192, 132, 252, 0.15); 
+            border-radius: 24px; 
+            backdrop-blur: 10px;
+        }
+
+        .gold-glow { text-shadow: 0 0 15px rgba(192, 132, 252, 0.5); }
+        
+        .tab-btn {
+            color: #a855f7;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .active-tab {
+            color: #e9d5ff;
+            border-bottom: 2px solid #c084fc;
+            background: rgba(192, 132, 252, 0.05);
+        }
+
+        .hidden { display: none !important; }
+
+        input, textarea {
+            background: rgba(0,0,0,0.4) !important;
+            outline: none !important;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: #c084fc !important;
+            box-shadow: 0 0 10px rgba(192, 132, 252, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="p-6 border-b border-purple-900/30 bg-black/20 backdrop-blur-md flex justify-between items-center z-50">
+        <h1 class="font-pacifico text-xl text-purple-300 gold-glow tracking-wide">Mythos Engine</h1>
+    </header>
+
+    <div id="tab-nav" class="flex bg-black/30 border-b border-purple-900/20 z-40 backdrop-blur-sm">
+        <button onclick="showTab('ai')" id="btn-ai" class="tab-btn active-tab flex-1 py-4 font-cinzel text-[10px] font-bold uppercase tracking-[0.3em]">The Monarch</button>
+        <button onclick="showTab('you')" id="btn-you" class="tab-btn flex-1 py-4 font-cinzel text-[10px] font-bold uppercase tracking-[0.3em]">The Guest</button>
+        <button onclick="showTab('scene')" id="btn-scene" class="tab-btn flex-1 py-4 font-cinzel text-[10px] font-bold uppercase tracking-[0.3em]">The Kingdom</button>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-4 pb-24">
+        <div id="tab-ai" class="tab-content space-y-6">
+            <div class="royal-card p-6">
+                <h2 class="font-cinzel text-sm mb-4 text-purple-400">Divine Essence</h2>
+                <div class="flex gap-3">
+                    <button onclick="setAiGender('Male')" id="ai-gender-male" class="flex-1 py-3 border border-purple-500/30 rounded-xl text-purple-200 hover:bg-purple-900/20 transition-all">King</button>
+                    <button onclick="setAiGender('Female')" id="ai-gender-female" class="flex-1 py-3 border border-purple-500/30 rounded-xl text-purple-200 hover:bg-purple-900/20 transition-all">Queen</button>
+                </div>
+            </div>
+
+            <div id="ai-selection-area" class="hidden space-y-4">
+                <h2 class="font-cinzel text-sm text-purple-400 ml-2">Choose the Inhabitant</h2>
+                <div id="ai-character-cards" class="grid gap-3"></div>
+                
+                <div id="ai-custom-fields" class="hidden space-y-3 mt-4 royal-card p-6">
+                    <input id="ai-custom-name" placeholder="Name your entity..." class="w-full p-4 border border-purple-500/30 rounded-xl text-white">
+                    <textarea id="ai-custom-desc" placeholder="Describe their personality and flaws..." class="w-full p-4 border border-purple-500/30 rounded-xl text-white h-24"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-you" class="tab-content hidden space-y-6">
+            <div class="royal-card p-6">
+                <h2 class="font-cinzel text-sm mb-4 text-purple-400">The Mortal Identity</h2>
+                <input id="user-display-name" placeholder="What shall the Monarch call you?" class="w-full p-4 border border-purple-500/30 rounded-xl text-white mb-4">
+                <textarea id="user-custom-desc" placeholder="Describe your character's role or appearance..." class="w-full p-4 border border-purple-500/30 rounded-xl text-white h-24"></textarea>
+            </div>
+        </div>
+
+        <div id="tab-scene" class="tab-content hidden space-y-6">
+            <div class="royal-card p-6">
+                <h2 class="font-cinzel text-sm mb-4 text-purple-400">The Woven Kingdom</h2>
+                <div id="scene-suggestions" class="grid gap-2 mb-4"></div>
+                <textarea id="scenario-input" placeholder="Where does the story begin? Describe the setting and the current action..." class="w-full h-40 p-4 border border-purple-500/30 rounded-xl text-white"></textarea>
+            </div>
+            
+            <button onclick="sendDataToTelegram()" class="w-full py-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:scale-[1.02] transition-transform animate-pulse uppercase tracking-widest">
+                Manifest Reality
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const CHARACTERS = {
+            Female: [
+                { id: 'custom', name: "Custom Soul", desc: "Forge a unique entity from the void.", isCustom: true },
+                { name: "Lilith", desc: "Ancient Female seductive succubus. Hourglass form, crimson skin, small horns. Insatiable lust feeder.", scenes: ["You secretly descended into the forgotten catacombs... a crimson silhouette waited...", "You broke into the sealed crypt at moonrise... curvy dark form stepped out..."] },
+                { name: "Hellien", desc: "300-year-old elegant vampire queen. Pale flawless skin, lithe athletic body. Predatory dominant.", scenes: ["You climbed the crumbling tower stairs... elegant lithe body draped in crimson silk...", "You slipped through the secret passage... regal figure rose from darkness..."] },
+                { name: "Maya", desc: "38-year-old ruthless billionaire CEO. Tall toned, power suits. Ice-cold control freak.", scenes: ["You used the override code... sharp silhouette turned from the windows...", "You infiltrated the private penthouse elevator... commanding figure stood at the bar..."] },
+                { name: "Nika", desc: "21-year-old spoiled rich stepsis. Slim athletic, bratty smirk. Teasing heiress vibe.", scenes: ["The mansion was silent past 2 AM... bedroom door eased open...", "You heard the shower stop... bratty silhouette appeared in the corridor..."] }
+            ],
+            Male: [
+                { id: 'custom', name: "Custom Soul", desc: "Forge a unique entity from the void.", isCustom: true },
+                { name: "Robert", desc: "35-year-old brooding tech billionaire. Tall broad, chiseled jaw. Possessive owner.", scenes: ["You were driven to his secluded coastal compound... tall broad silhouette waited...", "You entered the underground bunker... brooding figure stood at the control panel..."] },
+                { name: "John", desc: "24-year-old dominant stepbro. Tall muscular, ripped abs, cocky grin. Possessive big-bro energy.", scenes: ["House lights off... parents gone... tall muscular shadow filled the frame...", "Door eased open... dominant stepbro silhouette entered... cocky grin in moonlight."] },
+                { name: "Mike", desc: "46-year-old wealthy stepdad. Tall broad, silver-streaked hair. Strict daddy dom.", scenes: ["Mansion was quiet... tall broad silhouette appeared in the doorway...", "Woke to the sound of a key... wealthy stepdad figure stepped into your room..."] }
+            ]
+        };
+
+        let aiConfig = { gender: '', name: '', description: '' };
+        let userConfig = { name: '' };
+        let scenario = '';
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'));
+            document.getElementById('tab-' + id).classList.remove('hidden');
+            document.getElementById('btn-' + id).classList.add('active-tab');
+        }
+
+        function setAiGender(g) {
+            aiConfig.gender = g;
+            document.getElementById('ai-selection-area').classList.remove('hidden');
+            document.querySelectorAll('[id^="ai-gender-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('ai-gender-' + g.toLowerCase()).classList.add('active');
+            
+            const container = document.getElementById('ai-character-cards');
+            container.innerHTML = '';
+            
+            CHARACTERS[g].forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = "royal-card p-4 text-left hover:border-purple-400 transition-colors";
+                btn.innerHTML = `<div class="font-cinzel text-purple-200">${char.name}</div><div class="text-[10px] text-purple-400/70 mt-1">${char.desc}</div>`;
+                btn.onclick = () => {
+                    if(char.isCustom) {
+                        aiConfig.name = 'Custom Soul';
+                        document.getElementById('ai-custom-fields').classList.remove('hidden');
+                        document.getElementById('scene-suggestions').innerHTML = '';
+                    } else {
+                        aiConfig.name = char.name;
+                        aiConfig.description = char.desc;
+                        document.getElementById('ai-custom-fields').classList.add('hidden');
+                        renderScenes(char);
+                    }
+                    document.querySelectorAll('#ai-character-cards button').forEach(b => b.classList.remove('border-purple-400'));
+                    btn.classList.add('border-purple-400');
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderScenes(char) {
+            const sc = document.getElementById('scene-suggestions');
+            sc.innerHTML = '';
+            if(char.scenes) {
+                char.scenes.forEach(s => {
+                    const b = document.createElement('button');
+                    b.className = "p-3 border border-purple-500/20 rounded-xl text-[11px] text-left w-full hover:bg-purple-900/10 transition-colors";
+                    b.innerText = s;
+                    b.onclick = () => {
+                        document.getElementById('scenario-input').value = s;
+                    };
+                    sc.appendChild(b);
+                });
+            }
+        }
+
+        function sendDataToTelegram() {
+            const customName = document.getElementById('ai-custom-name').value;
+            const customDesc = document.getElementById('ai-custom-desc').value;
+            const userName = document.getElementById('user-display-name').value;
+            const finalScenario = document.getElementById('scenario-input').value;
+
+            // Apply logic for Custom characters
+            if (aiConfig.name === 'Custom Soul' || !aiConfig.name) {
+                aiConfig.name = customName;
+                aiConfig.description = customDesc;
+            }
+            
+            userConfig.name = userName;
+            scenario = finalScenario;
+
+            if(!aiConfig.name || !userConfig.name || !scenario) {
+                tg.showAlert("The ink has not yet filled the scroll. Please provide names and a scenario.");
+                return;
+            }
+
+            const payload = {
+                ai_name: aiConfig.name,
+                ai_desc: aiConfig.description,
+                user_name: userConfig.name,
+                scenario: scenario
+            };
+
+            tg.sendData(JSON.stringify(payload));
+        }
+    </script>
+</body>
+</html>
